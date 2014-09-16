@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Kirchbergerknorr_FactFinderSync>
+            <version>0.1.0</version>
+        </Kirchbergerknorr_FactFinderSync>
+    </modules>
+    <default>
+        <factfindersync>
+            <sync>
+                <active>1</active>
+                <log>1</log>
+                <queue>10</queue>
+                <cron>*/5 * * * *</cron>
+                <auth_user></auth_user>
+                <auth_password></auth_password>
+            </sync>
+        </factfindersync>
+    </default>
+    <global>
+        <models>
+            <factfindersync>
+                <class>Kirchbergerknorr_FactFinderSync_Model</class>
+            </factfindersync>
+        </models>
+        <resources>
+            <kk_factfindersync>
+                <setup>
+                    <module>Kirchbergerknorr_FactFinderSync</module>
+                    <class>Mage_Sales_Model_Mysql4_Setup</class>
+                </setup>
+            </kk_factfindersync>
+        </resources>
+    </global>
+    <crontab>
+        <jobs>
+            <factfindersync_job>
+                <schedule>
+                    <config_path>core/factfindersync/cron</config_path>
+                </schedule>
+                <run>
+                    <model>factfindersync/observer::startProductSync</model>
+                </run>
+            </factfindersync_job>
+        </jobs>
+    </crontab>
+</config>
