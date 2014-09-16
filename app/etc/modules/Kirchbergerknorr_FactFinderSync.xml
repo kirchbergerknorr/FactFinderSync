@@ -4,6 +4,9 @@
         <Kirchbergerknorr_FactFinderSync>
             <active>true</active>
             <codePool>community</codePool>
+            <depends>
+                <Flagbit_FactFinder />
+            </depends>
         </Kirchbergerknorr_FactFinderSync>
     </modules>
 </config>
