@@ -109,8 +109,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                 'visible' => true,
             );
 
-            print_r($productData); die;
-
             $this->_products[] = $productData;
 
             $product->setData('factfinder_updated', date('Y-m-d H:i:s'));
@@ -126,10 +124,10 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         $app = Mage::getStoreConfig('factfinder/search/context');
         $login = Mage::getStoreConfig('core/factfindersync/auth_user');
         $pass = md5(Mage::getStoreConfig('core/factfindersync/auth_password'));
-        $channel = 'test2';//Mage::getStoreConfig('factfinder/search/channel');
         $prefix = Mage::getStoreConfig('factfinder/search/auth_advancedPrefix');
         $postfix = Mage::getStoreConfig('factfinder/search/auth_advancedPostfix');
         $timestamp = round(microtime(true) * 1000);
+        $channel = Mage::getStoreConfig('factfinder/search/channel');
 
         $hash = md5($prefix.$timestamp.$pass.$postfix);
 
