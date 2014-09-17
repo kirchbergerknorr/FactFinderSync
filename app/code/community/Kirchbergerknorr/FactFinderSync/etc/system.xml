@@ -64,6 +64,17 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </auth_password>
+                        <attributes translate="label">
+                            <label>Attributes</label>
+                            <comment>
+                                <![CDATA[Coma separated attributes.]]>
+                            </comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </attributes>
                     </fields>
                 </factfindersync>
             </groups>
