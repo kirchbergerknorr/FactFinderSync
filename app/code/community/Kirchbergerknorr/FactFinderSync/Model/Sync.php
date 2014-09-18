@@ -36,10 +36,10 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
     {
         $this->log("Reseting products...");
         $collection = Mage::getModel('catalog/product')->getCollection()
-            ->addAttributeToFilter('factfinder_created', array('gt' => '0'), 'left');
+            ->addAttributeToFilter('factfinder_updated', array('gt' => '0'), 'left');
 
         foreach ($collection as $product) {
-            $product->setData('factfinder_created', '0');
+            $product->setData('factfinder_updated', '0');
             $product->save();
             $this->log("Resetted #%s", $product->getId());
         }
@@ -52,11 +52,12 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
 
         $collection = Mage::getModel('catalog/product')->getCollection()
             ->addAttributeToSelect('*')
-            ->addAttributeToFilter('factfinder_created', array('null' => true), 'left')
+            ->addAttributeToFilter('factfinder_updated', array('null' => true), 'left')
             ->setPageSize($limit);
 
         $factfinder = Mage::getModel('factfindersync/factfinder');
         $count = $factfinder->setCollection($collection);
+        $this->log("Found %s new products: %s", $count,  $factfinder->getIds());
         try {
             $factfinder->insertProducts();
             $this->log("Finished import for %s products: %s", $count, $factfinder->getIds());
@@ -72,13 +73,13 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
 
         $collection = Mage::getModel('catalog/product')->getCollection()
             ->addAttributeToSelect('*')
-            ->addAttributeToSelect('pim_imported')
-            ->addAttributeToFilter('factfinder_updated', array('lt' => 'pim_imported'))
-            ->addAttributeToFilter('pim_imported', array('gt' => '0'), 'left')
+            ->addAttributeToFilter('factfinder_updated', array('lt' => new Zend_Db_Expr('updated_at')))
             ->setPageSize($limit);
 
         $factfinder = Mage::getModel('factfindersync/factfinder');
         $count = $factfinder->setCollection($collection);
+        $this->log("Found %s updated products: %s", $count,  $factfinder->getIds());
+
         try {
             $factfinder->updateProducts();
             $this->log("Finished update for %s products: %s", $count,  $factfinder->getIds());

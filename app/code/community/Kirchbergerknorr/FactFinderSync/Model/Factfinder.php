@@ -21,6 +21,13 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
     public function setCollection($collection)
     {
+        $attributesString = Mage::getStoreConfig('core/factfindersync/attributes');
+        $attributes = explode(',', $attributesString);
+
+        foreach ($attributes as $attribute) {
+            $collection->addAttributeToSelect($attribute);
+        }
+
         $this->_products = array();
         $this->_ids = array();
 
@@ -33,9 +40,14 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         }
 
         foreach ($collection as $product) {
+            $productAttributes = array();
+            foreach ($attributes as $attribute) {
+                $productAttributes[] = $product->getData($attribute);
+            }
+
             $product->setStoreId($storeId);
             $this->_ids[] = $product->getId();
-            $this->_products[] = array(
+            $productData = array(
                 'id' => $product->getId(),
                 'record' => array(
                     array(
@@ -82,6 +94,14 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                         'key' => 'image',
                         'value' => (string) Mage::helper('catalog/image')->init($product, $imageType)->resize($imageSize)
                     ),
+                    array(
+                        'key' => 'filterable_attributes',
+                        'value' => ""
+                    ),
+                    array(
+                        'key' => 'searchable_attributes',
+                        'value' => join(" ", $productAttributes)
+                    ),
                 ),
                 'refKey' => '',
                 'simiMalusAdd' => 0,
@@ -89,7 +109,8 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                 'visible' => true,
             );
 
-            $product->setData('factfinder_created', date('Y-m-d H:i:s'));
+            $this->_products[] = $productData;
+
             $product->setData('factfinder_updated', date('Y-m-d H:i:s'));
             $product->save();
         }
@@ -103,10 +124,10 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         $app = Mage::getStoreConfig('factfinder/search/context');
         $login = Mage::getStoreConfig('core/factfindersync/auth_user');
         $pass = md5(Mage::getStoreConfig('core/factfindersync/auth_password'));
-        $channel = 'test2';//Mage::getStoreConfig('factfinder/search/channel');
         $prefix = Mage::getStoreConfig('factfinder/search/auth_advancedPrefix');
         $postfix = Mage::getStoreConfig('factfinder/search/auth_advancedPostfix');
         $timestamp = round(microtime(true) * 1000);
+        $channel = Mage::getStoreConfig('factfinder/search/channel');
 
         $hash = md5($prefix.$timestamp.$pass.$postfix);
 
