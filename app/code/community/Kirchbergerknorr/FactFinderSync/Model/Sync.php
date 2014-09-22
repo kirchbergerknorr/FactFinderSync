@@ -60,7 +60,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         $this->log("Found %s new products: %s", $count,  $factfinder->getIds());
         try {
             $factfinder->insertProducts();
-            $this->log("Finished import for %s products: %s", $count, $factfinder->getIds());
+            $this->log("Finished import for %s products", $count);
         } catch (Exception $e) {
             $this->log("Error importing: %s", $e->getMessage());
         }
@@ -82,7 +82,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
 
         try {
             $factfinder->updateProducts();
-            $this->log("Finished update for %s products: %s", $count,  $factfinder->getIds());
+            $this->log("Finished update for %s products", $count);
         } catch (Exception $e) {
             $this->log("Error importing: %s", $e->getMessage());
         }
