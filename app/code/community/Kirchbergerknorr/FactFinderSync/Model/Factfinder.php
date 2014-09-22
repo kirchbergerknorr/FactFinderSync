@@ -13,14 +13,25 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 {
     protected $_products;
     protected $_ids;
+    protected $_collection;
 
     public function log($message, $p1 = null, $p2 = null)
     {
         Mage::getModel('factfindersync/sync')->log($message, $p1, $p2);
     }
 
+    public function updateProductsDates()
+    {
+        foreach ($this->_collection as $product) {
+            $product->setData('factfinder_updated', date('Y-m-d H:i:s'));
+            $product->save();
+        }
+    }
+
     public function setCollection($collection)
     {
+        $this->_collection = $collection;
+
         $attributesString = Mage::getStoreConfig('core/factfindersync/attributes');
         $attributes = explode(',', $attributesString);
 
@@ -112,9 +123,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             }
 
             $this->_products[] = $productData;
-
-            $product->setData('factfinder_updated', date('Y-m-d H:i:s'));
-            $product->save();
         }
 
         return sizeof($this->_ids);
@@ -152,6 +160,8 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
         $client = new SoapClient($wsdlUrl, array('trace' => 1));
         $client->insertRecords($insertRecordRequest);
+
+        $this->updateProductsDates();
 
         $this->log('$insertRecordRequest: %s', print_r($insertRecordRequest, true));
         $this->log('Request: %s', $client->__getLastRequest());
@@ -196,6 +206,8 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             $this->log('Request: %s', $client->__getLastRequest());
             $this->log('Response: %s', $client->__getLastResponse());
         }
+
+        $this->updateProductsDates();
     }
 
     protected function _getCategoryName($product)
