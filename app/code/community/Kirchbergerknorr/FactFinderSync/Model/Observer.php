@@ -18,11 +18,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Observer
             return false;
         }
 
-        if (!Mage::getStoreConfig('core/factfindersync/enabled')) {
-            Mage::getModel('factfindersync/sync')->log('FactFinder is disabled');
-            return false;
-        }
-
         if(!Mage::getStoreConfig('core/factfindersync/running'))
         {
             Mage::getModel('core/config')->saveConfig('core/factfindersync/running', 1);
