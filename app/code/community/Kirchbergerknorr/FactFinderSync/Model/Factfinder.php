@@ -71,7 +71,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                     ),
                     array(
                         'key' => 'description',
-                        'value' => 'Description: '.$product->getDescription(),
+                        'value' => $product->getDescription(),
                     ),
                     array(
                         'key' => 'short_description',
