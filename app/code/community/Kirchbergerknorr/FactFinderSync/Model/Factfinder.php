@@ -42,7 +42,10 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         foreach ($collection as $product) {
             $productAttributes = array();
             foreach ($attributes as $attribute) {
-                $productAttributes[] = $product->getData($attribute);
+                $attribute = trim ($attribute);
+                if ($attribute) {
+                    $productAttributes[] = $product->getData($attribute);
+                }
             }
 
             $product->setStoreId($storeId);
@@ -68,7 +71,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                     ),
                     array(
                         'key' => 'description',
-                        'value' => $product->getDescription(),
+                        'value' => 'Description: '.$product->getDescription(),
                     ),
                     array(
                         'key' => 'short_description',
@@ -83,10 +86,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                         'value' => $product->getMetaDescription(),
                     ),
                     array(
-                        'key' => 'color',
-                        'value' => $product->getColor(),
-                    ),
-                    array(
                         'key' => 'category',
                         'value' => $this->_getCategoryName($product),
                     ),
@@ -97,17 +96,20 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                     array(
                         'key' => 'filterable_attributes',
                         'value' => ""
-                    ),
-                    array(
-                        'key' => 'searchable_attributes',
-                        'value' => join(" ", $productAttributes)
-                    ),
+                    )
                 ),
-                'refKey' => '',
-                'simiMalusAdd' => 0,
-                'simiMalusMul' => 0,
+                'refKey' => time(),
+                'simiMalusAdd' => 1,
+                'simiMalusMul' => 1,
                 'visible' => true,
             );
+
+            if (is_array($productAttributes) && count($productAttributes)>0) {
+                $productData['record'][] = array(
+                    'key' => 'searchable_attributes',
+                    'value' => join(" ", $productAttributes)
+                );
+            }
 
             $this->_products[] = $productData;
 
@@ -148,8 +150,12 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             ),
         );
 
-        $client = new SoapClient($wsdlUrl);
+        $client = new SoapClient($wsdlUrl, array('trace' => 1));
         $client->insertRecords($insertRecordRequest);
+
+        $this->log('$insertRecordRequest: %s', print_r($insertRecordRequest, true));
+        $this->log('Request: %s', $client->__getLastRequest());
+        $this->log('Response: %s', $client->__getLastResponse());
     }
 
     public function updateProducts()
@@ -158,7 +164,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         $app = Mage::getStoreConfig('factfinder/search/context');
         $login = Mage::getStoreConfig('core/factfindersync/auth_user');
         $pass = md5(Mage::getStoreConfig('core/factfindersync/auth_password'));
-        $channel = 'test2';//Mage::getStoreConfig('factfinder/search/channel');
+        $channel = Mage::getStoreConfig('factfinder/search/channel');
         $prefix = Mage::getStoreConfig('factfinder/search/auth_advancedPrefix');
         $postfix = Mage::getStoreConfig('factfinder/search/auth_advancedPostfix');
         $timestamp = round(microtime(true) * 1000);
@@ -173,7 +179,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
         foreach ($this->_products as $product) {
             $this->log("Updating #%s", $product['id']);
-            $insertRecordRequest = array(
+            $updateRecordRequest = array(
                 'in0' => $product,
                 'in1' => $channel,
                 'in2' => true,
@@ -184,8 +190,11 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                 ),
             );
 
-            $client = new SoapClient($wsdlUrl);
-            $client->updateRecord($insertRecordRequest);
+            $client = new SoapClient($wsdlUrl, array('trace' => 1));
+            $client->updateRecord($updateRecordRequest);
+
+            $this->log('Request: %s', $client->__getLastRequest());
+            $this->log('Response: %s', $client->__getLastResponse());
         }
     }
 
