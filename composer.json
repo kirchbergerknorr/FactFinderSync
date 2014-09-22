@@ -1,6 +1,7 @@
 {
     "name": "kirchbergerknorr/factfindersync",
     "description": "Kirchbergerknorr FactFinderSync",
+    "type": "magento-module",
     "authors": [
         {"name": "Aleksey Razbakov", "email": "ar@kirchbergerknorr.de"}
     ],
