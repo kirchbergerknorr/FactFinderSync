@@ -18,7 +18,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Observer
             return false;
         }
 
-        if(!Mage::getStoreConfig('core/factfindersync/running'))
+        if (Mage::getStoreConfig('core/factfindersync/running', 0)==="0")
         {
             $config = new Mage_Core_Model_Config();
             $config->saveConfig('core/factfindersync/running', "1", 'default', 0);
