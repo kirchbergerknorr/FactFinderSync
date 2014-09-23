@@ -23,6 +23,8 @@ class Kirchbergerknorr_FactFinderSync_Model_Observer
             Mage::getModel('core/config')->saveConfig('core/factfindersync/running', 1);
             Mage::getModel('factfindersync/sync')->start();
             Mage::getModel('core/config')->saveConfig('core/factfindersync/running', 0);
+        } else {
+            Mage::getModel('factfindersync/sync')->log('FactFinderSync is already running');
         }
     }
 }
