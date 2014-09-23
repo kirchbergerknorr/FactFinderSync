@@ -158,14 +158,27 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             ),
         );
 
-        $client = new SoapClient($wsdlUrl, array('trace' => 1));
-        $client->insertRecords($insertRecordRequest);
+        $client = new SoapClient($wsdlUrl);
+        try {
+            $client->insertRecords($insertRecordRequest);
+        } catch (Exception $e) {
+            $this->log("Exception while importing: %s", $e->getMessage());
+            $isExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordAlreadyExistException');
+            $this->log("isExists: %s", $isExists);
+
+            if ($isExists > -1) {
+                preg_match("/Record with id '([^']+)'/is", $e->getMessage(), $matches);
+                if (isset($matches[1])) {
+                    $skippedProductId = $matches[1];
+                    $product = Mage::getModel('catalog/product')->load($skippedProductId);
+                    $product->setData('factfinder_updated', date('Y-m-d H:i:s', strtotime('-1 days')));
+                    $product->save();
+                    $this->log("Skipping id %s", $skippedProductId);
+                }
+            }
+        }
 
         $this->updateProductsDates();
-
-        $this->log('$insertRecordRequest: %s', print_r($insertRecordRequest, true));
-        $this->log('Request: %s', $client->__getLastRequest());
-        $this->log('Response: %s', $client->__getLastResponse());
     }
 
     public function updateProducts()
@@ -200,11 +213,8 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                 ),
             );
 
-            $client = new SoapClient($wsdlUrl, array('trace' => 1));
+            $client = new SoapClient($wsdlUrl);
             $client->updateRecord($updateRecordRequest);
-
-            $this->log('Request: %s', $client->__getLastRequest());
-            $this->log('Response: %s', $client->__getLastResponse());
         }
 
         $this->updateProductsDates();
