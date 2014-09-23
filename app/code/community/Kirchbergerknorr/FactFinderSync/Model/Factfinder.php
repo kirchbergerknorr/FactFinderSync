@@ -216,7 +216,11 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             );
 
             $client = new SoapClient($wsdlUrl);
-            $client->updateRecord($updateRecordRequest);
+            try {
+                $client->updateRecord($updateRecordRequest);
+            } catch (Exception $e) {
+                $this->log("Exception: %s", $e->getMessage());
+            }
 
             $product = Mage::getModel('catalog/product')->load($product['id']);
             $product->setData('factfinder_updated', $this->_updateTime);
