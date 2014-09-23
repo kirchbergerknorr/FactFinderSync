@@ -220,6 +220,19 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                 $client->updateRecord($updateRecordRequest);
             } catch (Exception $e) {
                 $this->log("Exception: %s", $e->getMessage());
+                $isNotExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordNotFoundException');
+                $this->log("isNotExists: %s", $isNotExists);
+
+                if ($isNotExists > -1) {
+                    preg_match("/Record with id '([^']+)'/is", $e->getMessage(), $matches);
+                    if (isset($matches[1])) {
+                        $skippedProductId = $matches[1];
+                        $product = Mage::getModel('catalog/product')->load($skippedProductId);
+                        $product->setData('factfinder_updated', '0');
+                        $product->save();
+                        $this->log("Scheduled to insert id %s", $skippedProductId);
+                    }
+                }
             }
 
             $product = Mage::getModel('catalog/product')->load($product['id']);
