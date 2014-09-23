@@ -14,6 +14,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
     protected $_products;
     protected $_ids;
     protected $_collection;
+    protected $_updateTime;
 
     public function log($message, $p1 = null, $p2 = null)
     {
@@ -23,13 +24,14 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
     public function updateProductsDates()
     {
         foreach ($this->_collection as $product) {
-            $product->setData('factfinder_updated', date('Y-m-d H:i:s'));
+            $product->setData('factfinder_updated', $this->_updateTime);
             $product->save();
         }
     }
 
     public function setCollection($collection)
     {
+        $this->_updateTime = date('Y-m-d H:i:s');
         $this->_collection = $collection;
 
         $attributesString = Mage::getStoreConfig('core/factfindersync/attributes');
