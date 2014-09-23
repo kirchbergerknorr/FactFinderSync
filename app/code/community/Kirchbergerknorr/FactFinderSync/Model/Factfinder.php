@@ -217,9 +217,11 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
             $client = new SoapClient($wsdlUrl);
             $client->updateRecord($updateRecordRequest);
-        }
 
-        $this->updateProductsDates();
+            $product = Mage::getModel('catalog/product')->load($product['id']);
+            $product->setData('factfinder_updated', $this->_updateTime);
+            $product->save();
+        }
     }
 
     protected function _getCategoryName($product)
