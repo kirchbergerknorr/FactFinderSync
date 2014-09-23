@@ -13,6 +13,16 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
 {
     public function start()
     {
+        $config = new Mage_Core_Model_Config();
+
+        if (!Mage::getStoreConfig('core/factfindersync/running', 0))
+        {
+            $config->saveConfig('core/factfindersync/running', "1", 'default', 0);
+        } else {
+            $this->log('FactFinderSync is already running');
+            return false;
+        }
+
         $limit = Mage::getStoreConfig('core/factfindersync/queue');
 
         $this->log("========================================");
@@ -24,6 +34,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         $timeEnd = microtime(true);
         $time = $timeEnd - $timeStart;
         $this->log("Finished FactFinderSync limit %s in %s seconds", $limit, $time);
+        $config->saveConfig('core/factfindersync/running', "0", 'default', 0);
     }
 
     public function log($message, $p1 = null, $p2 = null) {
