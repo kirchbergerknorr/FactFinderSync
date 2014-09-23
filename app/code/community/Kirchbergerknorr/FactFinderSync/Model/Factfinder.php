@@ -218,6 +218,10 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             $client = new SoapClient($wsdlUrl);
             try {
                 $client->updateRecord($updateRecordRequest);
+
+                $product = Mage::getModel('catalog/product')->load($product['id']);
+                $product->setData('factfinder_updated', $this->_updateTime);
+                $product->save();
             } catch (Exception $e) {
                 $this->log("Exception: %s", $e->getMessage());
                 $isNotExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordNotFoundException');
@@ -234,10 +238,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                     }
                 }
             }
-
-            $product = Mage::getModel('catalog/product')->load($product['id']);
-            $product->setData('factfinder_updated', $this->_updateTime);
-            $product->save();
         }
     }
 
