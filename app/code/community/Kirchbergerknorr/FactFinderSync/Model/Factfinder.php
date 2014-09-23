@@ -31,7 +31,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
     public function setCollection($collection)
     {
-        $this->_updateTime = date('Y-m-d H:i:s');
+        $this->_updateTime = date('Y-m-d H:i:s', strtotime('+10 minutes'));
         $this->_collection = $collection;
 
         $attributesString = Mage::getStoreConfig('core/factfindersync/attributes');
