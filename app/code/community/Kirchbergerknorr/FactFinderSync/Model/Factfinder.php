@@ -162,9 +162,11 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             ),
         );
 
+        $this->log('Connecting to WSDL');
         $client = new SoapClient($wsdlUrl);
         try {
             $client->insertRecords($insertRecordRequest);
+            $this->log('Records inserted');
         } catch (Exception $e) {
             $this->log("Exception while importing: %s", $e->getMessage());
             $isExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordAlreadyExistException');
