@@ -23,10 +23,12 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
     public function updateProductsDates()
     {
+        $this->log('Starting updating dates');
         foreach ($this->_collection as $product) {
             $product->setData('factfinder_updated', $this->_updateTime);
             $product->save();
         }
+        $this->log('Finished updating dates');
     }
 
     public function setCollection($collection)
