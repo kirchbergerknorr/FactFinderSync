@@ -24,10 +24,20 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
     public function updateProductsDates()
     {
         $this->log('Starting updating dates');
-        foreach ($this->_collection as $product) {
-            $product->setData('factfinder_updated', $this->_updateTime);
-            $product->save();
+
+        $resource = Mage::getSingleton('core/resource');
+        $writeConnection = $resource->getConnection('core_write');
+        $table = $resource->getTableName('catalog_product_entity_datetime');
+        $eavAttribute = new Mage_Eav_Model_Mysql4_Entity_Attribute();
+        $code = $eavAttribute->getIdByCode('catalog_product', "factfinder_updated");
+
+        $query = "";
+        foreach ($this->_ids as $id) {
+            $query .= "REPLACE INTO {$table} (entity_id, entity_type_id, attribute_id, value) VALUES ('{$id}', 4, '{$code}', '{$this->_updateTime}');";
         }
+
+        $writeConnection->query($query);
+
         $this->log('Finished updating dates');
     }
 
