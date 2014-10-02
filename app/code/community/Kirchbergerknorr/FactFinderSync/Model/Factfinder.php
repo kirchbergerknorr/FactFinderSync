@@ -15,25 +15,24 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
     protected $_ids;
     protected $_collection;
     protected $_updateTime;
+    protected $_attributeCode;
 
     public function log($message, $p1 = null, $p2 = null)
     {
         Mage::getModel('factfindersync/sync')->log($message, $p1, $p2);
     }
 
-    public function updateProductsDates()
+    public function updateProductsDates($ids, $newTime)
     {
         $this->log('Starting updating dates');
 
         $resource = Mage::getSingleton('core/resource');
         $writeConnection = $resource->getConnection('core_write');
         $table = $resource->getTableName('catalog_product_entity_datetime');
-        $eavAttribute = new Mage_Eav_Model_Mysql4_Entity_Attribute();
-        $code = $eavAttribute->getIdByCode('catalog_product', "factfinder_updated");
 
         $query = "";
-        foreach ($this->_ids as $id) {
-            $query .= "REPLACE INTO {$table} (entity_id, entity_type_id, attribute_id, value) VALUES ('{$id}', 4, '{$code}', '{$this->_updateTime}');";
+        foreach ($ids as $id) {
+            $query .= "REPLACE INTO {$table} (entity_id, entity_type_id, attribute_id, value) VALUES ('{$id}', 4, '{$this->_attributeCode}', '{$newTime}');";
         }
 
         $writeConnection->query($query);
@@ -43,6 +42,9 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
     public function setCollection($collection)
     {
+        $eavAttribute = new Mage_Eav_Model_Mysql4_Entity_Attribute();
+        $this->_attributeCode = $eavAttribute->getIdByCode('catalog_product', "factfinder_updated");
+
         $this->_updateTime = date('Y-m-d H:i:s', strtotime('+30 minutes'));
         $this->_collection = $collection;
 
@@ -142,7 +144,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         return sizeof($this->_ids);
     }
 
-    public function insertProducts()
+    public function insertProducts($isInserting = true)
     {
         $url = Mage::getStoreConfig('factfinder/search/address');
         $app = Mage::getStoreConfig('factfinder/search/context');
@@ -161,65 +163,9 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             return false;
         }
 
-        $insertRecordRequest = array(
-            'in0' => $this->_products,
-            'in1' => $channel,
-            'in2' => true,
-            'in3' => array(
-                'password' => $hash,
-                'timestamp' => $timestamp,
-                'username' => $login,
-            ),
-        );
-
-        $this->log('Connecting to WSDL');
-        $client = new SoapClient($wsdlUrl);
-        try {
-            $client->insertRecords($insertRecordRequest);
-            $this->log('Records inserted');
-        } catch (Exception $e) {
-            $this->log("Exception while importing: %s", $e->getMessage());
-            $isExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordAlreadyExistException');
-            $this->log("isExists: %s", $isExists);
-
-            if ($isExists > -1) {
-                preg_match("/Record with id '([^']+)'/is", $e->getMessage(), $matches);
-                if (isset($matches[1])) {
-                    $skippedProductId = $matches[1];
-                    $product = Mage::getModel('catalog/product')->load($skippedProductId);
-                    $product->setData('factfinder_updated', date('Y-m-d H:i:s', strtotime('-1 days')));
-                    $product->save();
-                    $this->log("Skipping id %s", $skippedProductId);
-                }
-            }
-        }
-
-        $this->updateProductsDates();
-    }
-
-    public function updateProducts()
-    {
-        $url = Mage::getStoreConfig('factfinder/search/address');
-        $app = Mage::getStoreConfig('factfinder/search/context');
-        $login = Mage::getStoreConfig('core/factfindersync/auth_user');
-        $pass = md5(Mage::getStoreConfig('core/factfindersync/auth_password'));
-        $channel = Mage::getStoreConfig('factfinder/search/channel');
-        $prefix = Mage::getStoreConfig('factfinder/search/auth_advancedPrefix');
-        $postfix = Mage::getStoreConfig('factfinder/search/auth_advancedPostfix');
-        $timestamp = round(microtime(true) * 1000);
-
-        $hash = md5($prefix.$timestamp.$pass.$postfix);
-
-        $wsdlUrl = sprintf("http://%s/%s/webservice/ws69/Import?wsdl", $url, $app);
-
-        if (!$this->_products) {
-            return false;
-        }
-
-        foreach ($this->_products as $product) {
-            $this->log("Updating #%s", $product['id']);
-            $updateRecordRequest = array(
-                'in0' => $product,
+        if ($isInserting) {
+            $insertRecordRequest = array(
+                'in0' => $this->_products,
                 'in1' => $channel,
                 'in2' => true,
                 'in3' => array(
@@ -229,26 +175,59 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                 ),
             );
 
+            $this->log('Connecting to WSDL');
             $client = new SoapClient($wsdlUrl);
             try {
-                $client->updateRecord($updateRecordRequest);
-
-                $product = Mage::getModel('catalog/product')->load($product['id']);
-                $product->setData('factfinder_updated', $this->_updateTime);
-                $product->save();
+                $client->insertRecords($insertRecordRequest);
+                $this->log('Records inserted');
             } catch (Exception $e) {
-                $this->log("Exception: %s", $e->getMessage());
-                $isNotExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordNotFoundException');
-                $this->log("isNotExists: %s", $isNotExists);
+                $this->log("Exception while importing: %s", $e->getMessage());
+                $isExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordAlreadyExistException');
+                $this->log("isExists: %s", $isExists);
 
-                if ($isNotExists > -1) {
+                if ($isExists > -1) {
                     preg_match("/Record with id '([^']+)'/is", $e->getMessage(), $matches);
                     if (isset($matches[1])) {
                         $skippedProductId = $matches[1];
                         $product = Mage::getModel('catalog/product')->load($skippedProductId);
-                        $product->setData('factfinder_updated', '0');
+                        $product->setData('factfinder_updated', date('Y-m-d H:i:s', strtotime('-1 days')));
                         $product->save();
-                        $this->log("Scheduled to insert id %s", $skippedProductId);
+                        $this->log("Skipping id %s", $skippedProductId);
+                    }
+                }
+            }
+
+            $this->updateProductsDates($this->_ids, $this->_updateTime);
+        } else {
+            foreach ($this->_products as $product) {
+                $this->log("Updating #%s", $product['id']);
+                $updateRecordRequest = array(
+                    'in0' => $product,
+                    'in1' => $channel,
+                    'in2' => true,
+                    'in3' => array(
+                        'password' => $hash,
+                        'timestamp' => $timestamp,
+                        'username' => $login,
+                    ),
+                );
+
+                $client = new SoapClient($wsdlUrl);
+                try {
+                    $client->updateRecord($updateRecordRequest);
+                    $this->updateProductsDates(array($product['id']), $this->_updateTime);
+                } catch (Exception $e) {
+                    $this->log("Exception: %s", $e->getMessage());
+                    $isNotExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordNotFoundException');
+                    $this->log("isNotExists: %s", $isNotExists);
+
+                    if ($isNotExists > -1) {
+                        preg_match("/Record with id '([^']+)'/is", $e->getMessage(), $matches);
+                        if (isset($matches[1])) {
+                            $skippedProductId = $matches[1];
+                            $this->updateProductsDates(array($skippedProductId), 0);
+                            $this->log("Scheduled to insert id %s", $skippedProductId);
+                        }
                     }
                 }
             }
