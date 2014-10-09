@@ -89,14 +89,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                         'value' => $product->getSku(),
                     ),
                     array(
-                        'key' => 'manufacturer_id',
-                        'value' => $product->getManufacturerId(),
-                    ),
-                    array(
-                        'key' => 'vendor_id',
-                        'value' => $product->getVendorId(),
-                    ),
-                    array(
                         'key' => 'price',
                         'value' => (float) $product->getPrice(),
                     ),
@@ -131,6 +123,14 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                     array(
                         'key' => 'filterable_attributes',
                         'value' => ""
+                    ),
+                    array(
+                        'key' => 'manufacturer_id',
+                        'value' => $product->getManufacturerId(),
+                    ),
+                    array(
+                        'key' => 'vendor_id',
+                        'value' => $product->getVendorId(),
                     )
                 ),
                 'refKey' => time(),
