@@ -49,7 +49,9 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         $this->_collection = $collection;
 
         $attributesString = Mage::getStoreConfig('core/factfindersync/attributes');
+        $keyValAttrString = Mage::getStoreConfig('core/factfindersync/key_attributes');
         $attributes = explode(',', $attributesString);
+        $keyValAttr = explode(',', $keyValAttrString);
 
         foreach ($attributes as $attribute) {
             $collection->addAttributeToSelect($attribute);
@@ -123,14 +125,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                     array(
                         'key' => 'filterable_attributes',
                         'value' => ""
-                    ),
-                    array(
-                        'key' => 'manufacturer_id',
-                        'value' => $product->getManufacturerId(),
-                    ),
-                    array(
-                        'key' => 'vendor_id',
-                        'value' => $product->getVendorId(),
                     )
                 ),
                 'refKey' => time(),
@@ -138,6 +132,15 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                 'simiMalusMul' => 1,
                 'visible' => true,
             );
+
+            foreach($keyValAttr as $attr){
+                if($product->getData($attr)){
+                    $productData['record'][] = array(
+                        'key' => $attr,
+                        'value' => $product->getData($attr)
+                    );
+                }
+            }
 
             if (is_array($productAttributes) && count($productAttributes)>0) {
                 $productData['record'][] = array(
