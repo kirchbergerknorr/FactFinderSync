@@ -4,5 +4,7 @@ app/code/community/Kirchbergerknorr/FactFinderSync/Model/Factfinder.php app/code
 app/code/community/Kirchbergerknorr/FactFinderSync/Model/Observer.php app/code/community/Kirchbergerknorr/FactFinderSync/Model/Observer.php
 app/code/community/Kirchbergerknorr/FactFinderSync/Model/Sync.php app/code/community/Kirchbergerknorr/FactFinderSync/Model/Sync.php
 app/code/community/Kirchbergerknorr/FactFinderSync/sql/kk_factfindersync/mysql4-install-0.1.0.php app/code/community/Kirchbergerknorr/FactFinderSync/sql/kk_factfindersync/mysql4-install-0.1.0.php
+app/code/community/Kirchbergerknorr/FactFinderSync/sql/kk_factfindersync/mysql4-upgrade-0.1.0-0.1.1.php app/code/community/Kirchbergerknorr/FactFinderSync/sql/kk_factfindersync/mysql4-upgrade-0.1.0-0.1.1.php
 app/etc/modules/Kirchbergerknorr_FactFinderSync.xml app/etc/modules/Kirchbergerknorr_FactFinderSync.xml
-shell/factfindersync.php shell/factfindersync.php
+shell/factfinder-sync.php shell/factfinder-sync.php
+shell/factfinder-check.php shell/factfinder-check.php
