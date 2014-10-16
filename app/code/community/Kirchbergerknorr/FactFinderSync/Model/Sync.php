@@ -28,7 +28,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         $this->log("========================================");
         $timeStart = microtime(true);
         $this->log("Started FactFinderSync");
-//        $this->resetNewProducts();
         $this->insertNewProducts();
         $this->updateImportedProducts();
         $timeEnd = microtime(true);
@@ -40,19 +39,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
     public function log($message, $p1 = null, $p2 = null) {
         if(Mage::getStoreConfig('core/factfindersync/log')) {
             Mage::log(sprintf($message, $p1, $p2), null, 'kk_factfindersync.log');
-        }
-    }
-
-    protected function resetNewProducts()
-    {
-        $this->log("Reseting products...");
-        $collection = Mage::getModel('catalog/product')->getCollection()
-            ->addAttributeToFilter('factfinder_updated', array('gt' => '0'), 'left');
-
-        foreach ($collection as $product) {
-            $product->setData('factfinder_updated', '0');
-            $product->save();
-            $this->log("Resetted #%s", $product->getId());
         }
     }
 
@@ -70,7 +56,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         $count = $factfinder->setCollection($collection);
         $this->log("Found %s new products: %s", $count,  $factfinder->getIds());
         try {
-            $factfinder->insertProducts();
+            $factfinder->insertProducts(true);
             $this->log("Finished import for %s products", $count);
         } catch (Exception $e) {
             $this->log("Error importing: %s", $e->getMessage());
@@ -92,7 +78,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         $this->log("Found %s updated products: %s", $count,  $factfinder->getIds());
 
         try {
-            $factfinder->updateProducts();
+            $factfinder->insertProducts(false);
             $this->log("Finished update for %s products", $count);
         } catch (Exception $e) {
             $this->log("Error importing: %s", $e->getMessage());

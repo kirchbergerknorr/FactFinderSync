@@ -64,13 +64,24 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </auth_password>
+                        <key_attributes translate="label">
+                            <label>Attributes</label>
+                            <comment>
+                                <![CDATA[Need to be configured in FactFinder config! Coma separated attributes.]]>
+                            </comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </key_attributes>
                         <attributes translate="label">
                             <label>Attributes</label>
                             <comment>
                                 <![CDATA[Coma separated attributes.]]>
                             </comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                            <sort_order>80</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
