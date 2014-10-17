@@ -188,6 +188,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
             $this->log('Connecting to WSDL');
             $client = new SoapClient($wsdlUrl);
+
             try {
                 $client->insertRecords($insertRecordRequest);
                 $this->log('Records inserted');
@@ -200,15 +201,13 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                     preg_match("/Record with id '([^']+)'/is", $e->getMessage(), $matches);
                     if (isset($matches[1])) {
                         $skippedProductId = $matches[1];
-                        $product = Mage::getModel('catalog/product')->load($skippedProductId);
-                        $product->setData('factfinder_updated', date('Y-m-d H:i:s', strtotime('-1 days')));
-                        $product->save();
+                        $this->updateProductsDates(array($skippedProductId), $this->_updateTime);
                         $this->log("Skipping id %s", $skippedProductId);
                     }
+                } else {
+                    $this->updateProductsDates($this->_ids, $this->_updateTime);
                 }
             }
-
-            $this->updateProductsDates($this->_ids, $this->_updateTime);
         } else {
             foreach ($this->_products as $product) {
                 $this->log("Updating #%s", $product['id']);
