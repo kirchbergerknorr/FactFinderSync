@@ -76,18 +76,18 @@ class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
         echo sprintf($message, $p1, $p2, $p3)."\n";
     }
 
-    public function logException($message, $p1 = null, $p2 = null)
+    public function logException($message, $p1 = null, $p2 = null, $p3 = null)
     {
         $colors = new Colors();
         $message = $colors->getColoredString("[EXCEPTION]", "red", "black").' '.$message;
-        $this->log($message, $p1, $p2);
+        $this->log($message, $p1, $p2, $p3);
     }
 
-    public function logInfo($message, $p1 = null, $p2 = null)
+    public function logInfo($message, $p1 = null, $p2 = null, $p3 = null)
     {
         $colors = new Colors();
         $message = $colors->getColoredString("[INFO]", "light_blue", "black").' '.$message;
-        $this->log($message, $p1, $p2);
+        $this->log($message, $p1, $p2, $p3);
     }
 
     public function logSeparator()
@@ -97,7 +97,26 @@ class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
         $this->log($message);
     }
 
-    protected function updateId($id)
+
+    protected function _fileGetContentsChunked($file, $chunk_size, $callback)
+    {
+        global $padding;
+        $padding = 0;
+        $handle = fopen($file, "r");
+        $i = 0;
+        while (!feof($handle))
+        {
+            fseek($handle, $chunk_size * $i + $padding);
+            call_user_func_array($callback, array(fread($handle, $chunk_size), &$handle, $i));
+            $i++;
+        }
+
+        fclose($handle);
+
+        return true;
+    }
+
+    protected function updateId($id, $iteration)
     {
         $resource = Mage::getSingleton('core/resource');
         $table = $resource->getTableName('catalog_product_entity_int');
@@ -119,38 +138,50 @@ class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
     {
         global $ids;
         $ids = array();
-        $lastPosition = 0;
-        if (defined('DEBUG_ITERATION') && DEBUG_ITERATION) {
-            $lastPosition = DEBUG_ITERATION;
-        }
 
-        $fileSize = filesize($fileName);
-        $fh = fopen($fileName, 'r');
+        $success = $this->_fileGetContentsChunked($fileName, 4096, function($chunk, &$handle, $iteration){
+            global $ids;
+            global $padding;
 
-        $this->log("Position: %s, fileSize: %s\n", $lastPosition, $fileSize);
+            $debugIteration = -1;
 
-        while ($lastPosition < $fileSize) {
-            $this->log("Position: %s, fileSize: %s\n", $lastPosition, $fileSize);
-            fseek($fh, $lastPosition);
-
-            while ($row = fgetcsv($fh, null, "\t")) {
-                $id = $row[0];
-
-                $this->updateId($id);
-
-                if ($id < 4001 || sizeof($row) != 23) {
-                    $this->log("id: %s, position: %s\n\n %s \n\n", $id, $lastPosition, print_r($row, true));
-                }
-
-                $lastPosition = ftell($fh);
-
-                if (defined('DEBUG_LOG_STEPS') && DEBUG_LOG_STEPS) {
-                    $this->log('Position %s', $lastPosition);
-                }
+            if (defined('DEBUG_ITERATION')) {
+                $debugIteration = DEBUG_ITERATION;
             }
+
+            if (defined('DEBUG_LOG_STEPS') && DEBUG_LOG_STEPS) {
+                $this->log('Iteration %s', $iteration);
+            }
+
+            preg_match_all('#(\s(\d+)\t).*#i', $chunk, $matches);
+
+            unset($matches[2][0]);
+
+            foreach($matches[2] as $id) {
+                if ($id < 1000 || $padding) {
+                    $this->logInfo("padding: %s", $padding);
+                    $this->logInfo("id: %s, iteration: %s\n\n %s \n\n", $id, $iteration, $chunk);
+
+                    $padding = -50;
+                } else {
+                    $padding = 0;
+                }
+
+                $this->updateId($id, $iteration);
+            }
+
+            if ($debugIteration == $iteration) {
+                print_r($matches[2]); die;
+            }
+        });
+
+        if(!$success) {
+            throw new Exception('Failed');
         }
 
-        $this->logInfo('Finished');
+        if($success) {
+            $this->logInfo('Finished');
+        }
     }
 
     public function run($params = false)
