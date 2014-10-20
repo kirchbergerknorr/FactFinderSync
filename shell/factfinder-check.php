@@ -107,6 +107,11 @@ class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
         while (!feof($handle))
         {
             fseek($handle, $chunk_size * $i + $padding);
+
+            $current = ftell($handle);
+            $fileSize = filesize($file);
+            echo sprintf("%s%% [%s bytes from %s bytes] \r", round($current/$fileSize*100), $current, $fileSize);
+
             call_user_func_array($callback, array(fread($handle, $chunk_size), &$handle, $i));
             $i++;
         }
@@ -125,7 +130,7 @@ class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
         $code = $eavAttribute->getIdByCode('catalog_product', "factfinder_exists");
         $query = "REPLACE INTO {$table} (entity_id, entity_type_id, attribute_id, value) VALUES ('{$id}', 4, '{$code}', '1');";
 
-        if (!defined('DEBUG_NO_SAVE')) {
+        if (!defined('DEBUG_NO_SAVE') || !DEBUG_NO_SAVE) {
             $writeConnection->query($query);
         }
 
@@ -153,11 +158,19 @@ class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
                 $this->log('Iteration %s', $iteration);
             }
 
-            preg_match_all('#(\s(\d+)\t).*#i', $chunk, $matches);
-
-            unset($matches[2][0]);
+            preg_match_all('#(\n(\d+)\t).*#i', $chunk, $matches);
 
             foreach($matches[2] as $id) {
+                if (!$id) {
+                    continue;
+                }
+
+//                $this->logException('----------------');
+//                echo $chunk;
+//                echo "\n\n=====\n\n";
+//                print_r($matches);
+//                die;
+
                 if ($id < 1000 || $padding) {
                     $this->logInfo("padding: %s", $padding);
                     $this->logInfo("id: %s, iteration: %s\n\n %s \n\n", $id, $iteration, $chunk);
@@ -203,7 +216,7 @@ HELP;
         unset($params[0]);
         $fileName = $params[1];
 
-        define('DEBUG_NO_SAVE', true);
+        define('DEBUG_NO_SAVE', false);
         define('DEBUG_LOG_STEPS', false);
         if (isset($params[2])) {
             define('DEBUG_ITERATION', $params[2]);
