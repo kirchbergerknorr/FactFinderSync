@@ -71,9 +71,9 @@ class Colors {
 
 class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
 {
-    public function log($message, $p1 = null, $p2 = null)
+    public function log($message, $p1 = null, $p2 = null, $p3 = null)
     {
-        echo sprintf($message, $p1, $p2)."\n";
+        echo sprintf($message, $p1, $p2, $p3)."\n";
     }
 
     public function logException($message, $p1 = null, $p2 = null)
@@ -97,23 +97,8 @@ class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
         $this->log($message);
     }
 
-
-    protected function _fileGetContentsChunked($file, $chunk_size, $callback)
+    protected function updateId($id)
     {
-        $handle = fopen($file, "r");
-        $i = 0;
-        while (!feof($handle))
-        {
-            call_user_func_array($callback, array(fread($handle, $chunk_size), &$handle, $i));
-            $i++;
-        }
-
-        fclose($handle);
-
-        return true;
-    }
-
-    protected function updateId($id) {
         $resource = Mage::getSingleton('core/resource');
         $table = $resource->getTableName('catalog_product_entity_int');
         $writeConnection = $resource->getConnection('core_write');
@@ -121,33 +106,51 @@ class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
         $code = $eavAttribute->getIdByCode('catalog_product', "factfinder_exists");
         $query = "REPLACE INTO {$table} (entity_id, entity_type_id, attribute_id, value) VALUES ('{$id}', 4, '{$code}', '1');";
 
-        $writeConnection->query($query);
-        $this->log('Updated %s', $id);
+        if (!defined('DEBUG_NO_SAVE')) {
+            $writeConnection->query($query);
+        }
+
+        if (defined('DEBUG_LOG_STEPS') && DEBUG_LOG_STEPS) {
+            $this->log('Updated %s', $id);
+        }
     }
 
     function load($fileName)
     {
         global $ids;
         $ids = array();
+        $lastPosition = 0;
+        if (defined('DEBUG_ITERATION') && DEBUG_ITERATION) {
+            $lastPosition = DEBUG_ITERATION;
+        }
 
-        $success = $this->_fileGetContentsChunked($fileName, 4096, function($chunk, &$handle, $iteration){
-            $this->log('Iteration %s', $iteration);
-            global $ids;
-            preg_match_all('#(\s(\d+)).*#i', $chunk, $matches);
-            unset($matches[2][0]);
+        $fileSize = filesize($fileName);
+        $fh = fopen($fileName, 'r');
 
-            foreach($matches[2] as $id) {
+        $this->log("Position: %s, fileSize: %s\n", $lastPosition, $fileSize);
+
+        while ($lastPosition < $fileSize) {
+            $this->log("Position: %s, fileSize: %s\n", $lastPosition, $fileSize);
+            fseek($fh, $lastPosition);
+
+            while ($row = fgetcsv($fh, null, "\t")) {
+                $id = $row[0];
+
                 $this->updateId($id);
+
+                if ($id < 4001 || sizeof($row) != 23) {
+                    $this->log("id: %s, position: %s\n\n %s \n\n", $id, $lastPosition, print_r($row, true));
+                }
+
+                $lastPosition = ftell($fh);
+
+                if (defined('DEBUG_LOG_STEPS') && DEBUG_LOG_STEPS) {
+                    $this->log('Position %s', $lastPosition);
+                }
             }
-        });
-
-        if(!$success) {
-            throw new Exception('Failed');
         }
 
-        if($success) {
-            $this->logInfo('Finished');
-        }
+        $this->logInfo('Finished');
     }
 
     public function run($params = false)
@@ -168,6 +171,12 @@ HELP;
 
         unset($params[0]);
         $fileName = $params[1];
+
+        define('DEBUG_NO_SAVE', true);
+        define('DEBUG_LOG_STEPS', false);
+        if (isset($params[2])) {
+            define('DEBUG_ITERATION', $params[2]);
+        }
 
         $this->log('Loading %s', $fileName);
         $this->load($fileName);
