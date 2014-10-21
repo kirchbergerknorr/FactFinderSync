@@ -238,6 +238,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             try {
                 $client->insertRecords($insertRecordRequest);
                 $this->log('Records inserted');
+                $this->updateProductsDates($this->_ids, $this->_updateTime);
             } catch (Exception $e) {
                 $this->log("Exception while importing: %s", $e->getMessage());
                 $isExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordAlreadyExistException');
@@ -247,11 +248,9 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                     preg_match("/Record with id '([^']+)'/is", $e->getMessage(), $matches);
                     if (isset($matches[1])) {
                         $skippedProductId = $matches[1];
-                        $this->updateProductsDates(array($skippedProductId), $this->_updateTime);
+                        $this->updateProductsDates(array($skippedProductId), date('Y-m-d H:i:s', strtotime('-90 minutes')));
                         $this->log("Skipping id %s", $skippedProductId);
                     }
-                } else {
-                    $this->updateProductsDates($this->_ids, $this->_updateTime);
                 }
             }
         } else {
