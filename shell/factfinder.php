@@ -243,6 +243,9 @@ HELP;
         switch ($method)
         {
             case 'sync':
+                if (count($params) == 3 && $params[2] == true) {
+                    define('DEBUG_CONSOLE_LOG', true);
+                }
 
                 $this->sync();
                 break;

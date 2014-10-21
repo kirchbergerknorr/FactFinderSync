@@ -11,17 +11,39 @@
 
 class Kirchbergerknorr_FactFinderSync_Model_Sync
 {
+    /**
+     * Our process ID.
+     */
+    const PROCESS_ID = 'kk_factfindersync';
+
+    /**
+     * Mage_Index_Model_Process will provide us a lock file API.
+     *
+     * @var Mage_Index_Model_Process $indexProcess
+     */
+    private $indexProcess;
+
+    /**
+     * Constructor.  Instantiate the Process model, and set our custom
+     * batch process ID.
+     */
+    public function __construct()
+    {
+        $this->indexProcess = new Mage_Index_Model_Process();
+
+        $this->indexProcess->setId(self::PROCESS_ID);
+    }
+
     public function start()
     {
-        $config = new Mage_Core_Model_Config();
-
-        if (!Mage::getStoreConfig('core/factfindersync/running', 0))
+        if ($this->indexProcess->isLocked())
         {
-            $config->saveConfig('core/factfindersync/running', "1", 'default', 0);
-        } else {
-            $this->log('FactFinderSync is already running');
+            $this->log("Another %s process is running! Aborted", self::PROCESS_ID);
             return false;
         }
+
+        // Set an exclusive lock.
+        $this->indexProcess->lockAndBlock();
 
         $limit = Mage::getStoreConfig('core/factfindersync/queue');
 
@@ -33,12 +55,20 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         $timeEnd = microtime(true);
         $time = $timeEnd - $timeStart;
         $this->log("Finished FactFinderSync limit %s in %s seconds", $limit, $time);
-        $config->saveConfig('core/factfindersync/running', "0", 'default', 0);
+
+        // Remove the lock.
+        $this->indexProcess->unlock();
+
+        return true;
     }
 
     public function log($message, $p1 = null, $p2 = null) {
         if(Mage::getStoreConfig('core/factfindersync/log')) {
-            Mage::log(sprintf($message, $p1, $p2), null, 'kk_factfindersync.log');
+            $line = sprintf($message, $p1, $p2);
+            Mage::log($line, null, 'kk_factfindersync.log');
+            if (defined('DEBUG_CONSOLE_LOG')) {
+                echo $line."\n";
+            }
         }
     }
 
