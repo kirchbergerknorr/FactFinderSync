@@ -209,10 +209,22 @@ class Kirchbergerknorr_Shell_FactFinder extends Mage_Shell_Abstract
 
         $help = <<< HELP
 
-    php factfinder.php sync                 - start sync
-    php factfinder.php check <filename.csv> - save id (first column) from csv as factfinder_exists attribute
-    php factfinder.php test-id <Product Id> - check if product id in factfinder
-    php factfinder.php test-all             - check if products from database exists in factfinder and print which id were not found
+    Start sync:
+
+      php factfinder.php sync
+
+    Save id (first column) from csv as factfinder_exists attribute:
+
+      php factfinder.php check <filename.csv>
+
+    Check if product id in factfinder:
+
+      php factfinder.php test-id <Product Id>
+
+    Check if products from database exists in factfinder and print which id were not found.
+    Optionally get ids from file:
+
+      php factfinder.php test-all [filename.csv]
 
 HELP;
 
@@ -275,7 +287,7 @@ HELP;
                     $fileName = $params[2];
                     $handle = fopen($fileName, "r");
                     while ($row = fgets($handle)) {
-                        $ids[] = $row;
+                        $ids[] = trim($row);
                     }
                 }
 
