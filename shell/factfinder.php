@@ -302,12 +302,23 @@ HELP;
                     }
                 }
 
+                $this->logInfo("Searching for missing products...");
+                $i = 0;
+                $missing = array();
                 foreach ($ids as $id) {
                     $result = Mage::getModel('factfindersync/factfinder')->searchId($id);
-                    $this->log("checking %s", $id);
+                    $i++;
+                    echo sprintf("%s%% [%s from %s] \r", round($i/sizeof($ids)*100), $i, sizeof($ids));
+
                     if (!$result) {
-                        $this->log("NOT FOUND: %s", $id);
+                        $missing[] = $id;
                     }
+                }
+                $this->logInfo("Finished");
+
+                if ($missing) {
+                    $this->log("Missing ids: %s", join(', ', $missing));
+                    file_put_contents('missing.txt', join("\n", $missing));
                 }
 
                 break;

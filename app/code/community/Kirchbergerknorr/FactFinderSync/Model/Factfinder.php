@@ -190,7 +190,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         $response = $client->getResult($searchRequest);
 
         $found = false;
-        if (isset($response->out->records->SearchRecord) && $response->out->records->SearchRecord->id == $id) {
+        if (isset($response->out->records->SearchRecord) && isset($response->out->records->SearchRecord->id) && $response->out->records->SearchRecord->id == $id) {
             $found = true;
         }
 
