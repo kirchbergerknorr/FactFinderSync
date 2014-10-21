@@ -40,7 +40,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         $this->log('Finished updating dates');
     }
 
-    public function setCollection($collection)
+    public function setCollection($collection, $excludeExisting = false)
     {
         $eavAttribute = new Mage_Eav_Model_Mysql4_Entity_Attribute();
         $this->_attributeCode = $eavAttribute->getIdByCode('catalog_product', "factfinder_updated");
@@ -75,6 +75,10 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                 if ($attribute) {
                     $productAttributes[] = $product->getData($attribute);
                 }
+            }
+
+            if ($this->searchId($product->getId())) {
+                continue;
             }
 
             $product->setStoreId($storeId);

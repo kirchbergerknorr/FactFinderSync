@@ -53,7 +53,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
             ->setPageSize($limit);
 
         $factfinder = Mage::getModel('factfindersync/factfinder');
-        $count = $factfinder->setCollection($collection);
+        $count = $factfinder->setCollection($collection, true);
         $this->log("Found %s new products: %s", $count,  $factfinder->getIds());
         try {
             $factfinder->insertProducts(true);
