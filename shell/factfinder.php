@@ -69,7 +69,8 @@ class Colors {
     }
 }
 
-class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
+
+class Kirchbergerknorr_Shell_FactFinder extends Mage_Shell_Abstract
 {
     public function log($message, $p1 = null, $p2 = null, $p3 = null)
     {
@@ -197,38 +198,120 @@ class Kirchbergerknorr_Shell_FactFinderCheck extends Mage_Shell_Abstract
         }
     }
 
-    public function run($params = false)
+    public function sync()
     {
-        if (!$params || count($params) < 2) {
-            $help = <<< HELP
-USAGE:
+        Mage::getModel('factfindersync/sync')->start();
+    }
 
-    php factfinder-check.php <filename.csv> - save id (first column) from csv as factfinder_exists attribute
+    public function help()
+    {
+        $this->logInfo('FactFinderSync Help:');
+
+        $help = <<< HELP
+
+    php factfinder.php sync                 - start sync
+    php factfinder.php check <filename.csv> - save id (first column) from csv as factfinder_exists attribute
+    php factfinder.php test-id <Product Id> - check if product id in factfinder
+    php factfinder.php test-all             - check if products from database exists in factfinder and print which id were not found
 
 HELP;
 
-            $this->log($help);
+        $this->log($help);
+    }
+
+    public function run($params = false)
+    {
+        if (!$params || count($params) < 2) {
+            $this->help();
             return false;
         }
 
-        $this->logInfo('Started');
+        $method = $params[1];
 
-        unset($params[0]);
-        $fileName = $params[1];
+        switch ($method)
+        {
+            case 'sync':
 
-        define('DEBUG_NO_SAVE', false);
-        define('DEBUG_LOG_STEPS', false);
-        if (isset($params[2])) {
-            define('DEBUG_ITERATION', $params[2]);
+                $this->sync();
+                break;
+
+            case 'check':
+
+                if (count($params) < 3) {
+                    $this->help();
+                    return false;
+                }
+
+                $fileName = $params[2];
+
+                define('DEBUG_NO_SAVE', false);
+                define('DEBUG_LOG_STEPS', false);
+
+                if (isset($params[3])) {
+                    define('DEBUG_ITERATION', $params[3]);
+                }
+
+                $this->log('Loading %s', $fileName);
+                $this->load($fileName);
+                break;
+
+            case 'test-id':
+
+                if (count($params) < 3) {
+                    $this->help();
+                    return false;
+                }
+
+                $id = $params[2];
+                $result = Mage::getModel('factfindersync/factfinder')->searchId($id);
+                $this->log("Found: %b", $result);
+                break;
+
+            case 'test-all':
+
+                $ids = array();
+
+                if (count($params) == 3) {
+                    $fileName = $params[2];
+                    $handle = fopen($fileName, "r");
+                    while ($row = fgets($handle)) {
+                        $ids[] = $row;
+                    }
+                }
+
+                if (count($params) == 2) {
+                    $collection = Mage::getModel('catalog/product')->getCollection()
+                        ->addAttributeToFilter('factfinder_checked', array('null' => true), 'left')
+                        ->setPageSize(5000);
+
+                    foreach ($collection as $product) {
+                        $id = $product->getId();
+                        $ids[] = $id;
+                    }
+                }
+
+                foreach ($ids as $id) {
+                    $result = Mage::getModel('factfindersync/factfinder')->searchId($id);
+                    $this->log("checking %s", $id);
+                    if (!$result) {
+                        $this->log("NOT FOUND: %s", $id);
+                    }
+                }
+
+                break;
+
+            default:
+            case 'help':
+
+                $this->help();
+                return false;
+                break;
         }
-
-        $this->log('Loading %s', $fileName);
-        $this->load($fileName);
     }
 }
 
-$shell = new Kirchbergerknorr_Shell_FactFinderCheck();
-$shell->logSeparator();
+
+$shell = new Kirchbergerknorr_Shell_FactFinder();
 
 try {
     $shell->run($argv);

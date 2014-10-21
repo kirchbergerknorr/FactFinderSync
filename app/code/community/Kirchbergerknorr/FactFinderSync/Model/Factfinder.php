@@ -155,6 +155,48 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         return sizeof($this->_ids);
     }
 
+    public function searchId($id)
+    {
+        $url = Mage::getStoreConfig('factfinder/search/address');
+        $app = Mage::getStoreConfig('factfinder/search/context');
+        $login = Mage::getStoreConfig('core/factfindersync/auth_user');
+        $pass = md5(Mage::getStoreConfig('core/factfindersync/auth_password'));
+        $prefix = Mage::getStoreConfig('factfinder/search/auth_advancedPrefix');
+        $postfix = Mage::getStoreConfig('factfinder/search/auth_advancedPostfix');
+        $timestamp = round(microtime(true) * 1000);
+        $channel = Mage::getStoreConfig('factfinder/search/channel');
+
+        $hash = md5($prefix.$timestamp.$pass.$postfix);
+
+        $wsdlUrl = sprintf("http://%s/%s/webservice/ws69/Search?wsdl", $url, $app);
+
+        $searchRequest = array(
+            'in0' => array(
+                'channel' => $channel,
+                'query' => $id,
+                'searchField' => 'id'
+            ),
+            'in1' => array(
+                'idsOnly' => true
+            ),
+            'in2' => array(
+                'password' => $hash,
+                'timestamp' => $timestamp,
+                'username' => $login,
+            ),
+        );
+
+        $client = new SoapClient($wsdlUrl);
+        $response = $client->getResult($searchRequest);
+
+        $found = false;
+        if (isset($response->out->records->SearchRecord) && $response->out->records->SearchRecord->id == $id) {
+            $found = true;
+        }
+
+        return $found;
+    }
+
     public function insertProducts($isInserting = true)
     {
         $url = Mage::getStoreConfig('factfinder/search/address');
