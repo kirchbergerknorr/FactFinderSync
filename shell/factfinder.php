@@ -312,13 +312,13 @@ HELP;
 
                     if (!$result) {
                         $missing[] = $id;
+                        file_put_contents('missing.txt', join("\n", $missing));
                     }
                 }
                 $this->logInfo("Finished");
 
                 if ($missing) {
                     $this->log("Missing ids: %s", join(', ', $missing));
-                    file_put_contents('missing.txt', join("\n", $missing));
                 }
 
                 break;
