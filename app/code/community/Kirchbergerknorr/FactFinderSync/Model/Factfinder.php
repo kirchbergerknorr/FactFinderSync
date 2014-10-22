@@ -24,8 +24,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
     public function updateProductsDates($ids, $newTime)
     {
-        $this->log('Starting updating dates');
-
         $resource = Mage::getSingleton('core/resource');
         $writeConnection = $resource->getConnection('core_write');
         $table = $resource->getTableName('catalog_product_entity_datetime');
@@ -37,7 +35,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
 
         $writeConnection->query($query);
 
-        $this->log('Finished updating dates');
+        $this->log('Updated factfinder_updated %s for %s', $newTime, join(', ', $ids));
     }
 
     public function setCollection($collection, $excludeExisting = false)
