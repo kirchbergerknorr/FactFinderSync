@@ -23,6 +23,8 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
      */
     private $indexProcess;
 
+    private $limit;
+
     /**
      * Constructor.  Instantiate the Process model, and set our custom
      * batch process ID.
@@ -34,8 +36,15 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         $this->indexProcess->setId(self::PROCESS_ID);
     }
 
-    public function start()
+    public function start($count)
     {
+        if (!$count) {
+            $this->limit = Mage::getStoreConfig('core/factfindersync/queue');
+        } else {
+            $this->limit = $count;
+        }
+
+
         if ($this->indexProcess->isLocked())
         {
             $this->log("Another %s process is running! Aborted", self::PROCESS_ID);
@@ -75,12 +84,11 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
     protected function insertNewProducts()
     {
         $this->log("Inserting products...");
-        $limit = Mage::getStoreConfig('core/factfindersync/queue');
 
         $collection = Mage::getModel('catalog/product')->getCollection()
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('factfinder_updated', array('null' => true), 'left')
-            ->setPageSize($limit);
+            ->setPageSize($this->limit);
 
         $factfinder = Mage::getModel('factfindersync/factfinder');
         $count = $factfinder->setCollection($collection, true);
@@ -96,12 +104,11 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
     protected function updateImportedProducts()
     {
         $this->log("Updating products...");
-        $limit = Mage::getStoreConfig('core/factfindersync/queue');
 
         $collection = Mage::getModel('catalog/product')->getCollection()
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('factfinder_updated', array('lt' => new Zend_Db_Expr('updated_at')))
-            ->setPageSize($limit);
+            ->setPageSize($this->limit);
 
         $factfinder = Mage::getModel('factfindersync/factfinder');
         $count = $factfinder->setCollection($collection);

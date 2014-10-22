@@ -200,7 +200,7 @@ class Kirchbergerknorr_Shell_FactFinder extends Mage_Shell_Abstract
 
     public function sync()
     {
-        Mage::getModel('factfindersync/sync')->start();
+        Mage::getModel('factfindersync/sync')->start($count);
     }
 
     public function help()
@@ -243,11 +243,13 @@ HELP;
         switch ($method)
         {
             case 'sync':
-                if (count($params) == 3 && $params[2] == true) {
-                    define('DEBUG_CONSOLE_LOG', true);
+                $count = false;
+
+                if (count($params) == 3) {
+                    $count = $params[2];
                 }
 
-                $this->sync();
+                $this->sync($count);
                 break;
 
             case 'check':
