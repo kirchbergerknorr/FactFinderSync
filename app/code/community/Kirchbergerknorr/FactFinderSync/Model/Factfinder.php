@@ -78,6 +78,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
             }
 
             if ($this->searchId($product->getId())) {
+                $this->updateProductsDates(array($product->getId()), $this->_updateTime);
                 continue;
             }
 
