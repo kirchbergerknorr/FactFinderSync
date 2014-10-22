@@ -54,8 +54,6 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         // Set an exclusive lock.
         $this->indexProcess->lockAndBlock();
 
-        $limit = Mage::getStoreConfig('core/factfindersync/queue');
-
         $this->log("========================================");
         $timeStart = microtime(true);
         $this->log("Started FactFinderSync");
@@ -63,7 +61,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         $this->updateImportedProducts();
         $timeEnd = microtime(true);
         $time = $timeEnd - $timeStart;
-        $this->log("Finished FactFinderSync limit %s in %s seconds", $limit, $time);
+        $this->log("Finished FactFinderSync limit %s in %s seconds", $this->limit, $time);
 
         // Remove the lock.
         $this->indexProcess->unlock();
