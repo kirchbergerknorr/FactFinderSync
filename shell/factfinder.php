@@ -198,7 +198,7 @@ class Kirchbergerknorr_Shell_FactFinder extends Mage_Shell_Abstract
         }
     }
 
-    public function sync()
+    public function sync($count)
     {
         Mage::getModel('factfindersync/sync')->start($count);
     }
