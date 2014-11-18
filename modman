@@ -1,5 +1,6 @@
 app/code/community/Kirchbergerknorr/FactFinderSync/etc/config.xml app/code/community/Kirchbergerknorr/FactFinderSync/etc/config.xml
 app/code/community/Kirchbergerknorr/FactFinderSync/etc/system.xml app/code/community/Kirchbergerknorr/FactFinderSync/etc/system.xml
+app/code/community/Kirchbergerknorr/FactFinderSync/Model/Adminhtml/Observer.php app/code/community/Kirchbergerknorr/FactFinderSync/Model/Adminhtml/Observer.php
 app/code/community/Kirchbergerknorr/FactFinderSync/Model/Factfinder.php app/code/community/Kirchbergerknorr/FactFinderSync/Model/Factfinder.php
 app/code/community/Kirchbergerknorr/FactFinderSync/Model/Observer.php app/code/community/Kirchbergerknorr/FactFinderSync/Model/Observer.php
 app/code/community/Kirchbergerknorr/FactFinderSync/Model/Sync.php app/code/community/Kirchbergerknorr/FactFinderSync/Model/Sync.php
