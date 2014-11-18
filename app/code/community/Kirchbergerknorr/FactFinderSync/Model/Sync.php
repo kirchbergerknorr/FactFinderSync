@@ -39,7 +39,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
     public function start($count)
     {
         if (!$count) {
-            $this->limit = Mage::getStoreConfig('core/factfindersync/queue');
+            $this->limit = Mage::getStoreConfig('kirchbergerknorr/factfindersync/queue');
         } else {
             $this->limit = $count;
         }
@@ -70,7 +70,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
     }
 
     public function log($message, $p1 = null, $p2 = null) {
-        if(Mage::getStoreConfig('core/factfindersync/log')) {
+        if(Mage::getStoreConfig('kirchbergerknorr/factfindersync/log')) {
             $line = sprintf($message, $p1, $p2);
             Mage::log($line, null, 'kk_factfindersync.log');
             if (defined('DEBUG_CONSOLE_LOG')) {

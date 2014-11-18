@@ -46,8 +46,8 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
         $this->_updateTime = date('Y-m-d H:i:s', strtotime('+30 minutes'));
         $this->_collection = $collection;
 
-        $attributesString = Mage::getStoreConfig('core/factfindersync/attributes');
-        $keyValAttrString = Mage::getStoreConfig('core/factfindersync/key_attributes');
+        $attributesString = Mage::getStoreConfig('kirchbergerknorr/factfindersync/attributes');
+        $keyValAttrString = Mage::getStoreConfig('kirchbergerknorr/factfindersync/key_attributes');
         $attributes = explode(',', $attributesString);
         $keyValAttr = explode(',', $keyValAttrString);
 
@@ -162,8 +162,8 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
     {
         $url = Mage::getStoreConfig('factfinder/search/address');
         $app = Mage::getStoreConfig('factfinder/search/context');
-        $login = Mage::getStoreConfig('core/factfindersync/auth_user');
-        $pass = md5(Mage::getStoreConfig('core/factfindersync/auth_password'));
+        $login = Mage::getStoreConfig('kirchbergerknorr/factfindersync/auth_user');
+        $pass = md5(Mage::getStoreConfig('kirchbergerknorr/factfindersync/auth_password'));
         $prefix = Mage::getStoreConfig('factfinder/search/auth_advancedPrefix');
         $postfix = Mage::getStoreConfig('factfinder/search/auth_advancedPostfix');
         $timestamp = round(microtime(true) * 1000);
@@ -204,8 +204,8 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
     {
         $url = Mage::getStoreConfig('factfinder/search/address');
         $app = Mage::getStoreConfig('factfinder/search/context');
-        $login = Mage::getStoreConfig('core/factfindersync/auth_user');
-        $pass = md5(Mage::getStoreConfig('core/factfindersync/auth_password'));
+        $login = Mage::getStoreConfig('kirchbergerknorr/factfindersync/auth_user');
+        $pass = md5(Mage::getStoreConfig('kirchbergerknorr/factfindersync/auth_password'));
         $prefix = Mage::getStoreConfig('factfinder/search/auth_advancedPrefix');
         $postfix = Mage::getStoreConfig('factfinder/search/auth_advancedPostfix');
         $timestamp = round(microtime(true) * 1000);

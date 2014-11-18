@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
+    <tabs>
+        <kirchbergerknorr translate="label">
+            <label>Kirchbergerknorr</label>
+            <sort_order>99999</sort_order>
+        </kirchbergerknorr>
+    </tabs>
     <sections>
-        <core>
+        <kirchbergerknorr>
+            <label>FactFinder</label>
+            <tab>kirchbergerknorr</tab>
+            <frontend_type>text</frontend_type>
+            <show_in_default>1</show_in_default>
+            <show_in_website>0</show_in_website>
+            <show_in_store>0</show_in_store>
+            <sort_order>1</sort_order>
             <groups>
                 <factfindersync>
                     <label>FactFinderSync</label>
@@ -89,6 +102,6 @@
                     </fields>
                 </factfindersync>
             </groups>
-        </core>
+        </kirchbergerknorr>
     </sections>
 </config>

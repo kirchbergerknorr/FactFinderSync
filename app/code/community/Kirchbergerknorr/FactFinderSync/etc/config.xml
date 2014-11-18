@@ -6,8 +6,8 @@
         </Kirchbergerknorr_FactFinderSync>
     </modules>
     <default>
-        <factfindersync>
-            <sync>
+        <kirchbergerknorr>
+            <factfindersync>
                 <active>1</active>
                 <log>1</log>
                 <queue>10</queue>
@@ -15,8 +15,8 @@
                 <auth_user></auth_user>
                 <auth_password></auth_password>
                 <attributes></attributes>
-            </sync>
-        </factfindersync>
+            </factfindersync>
+        </kirchbergerknorr>
     </default>
     <global>
         <models>
@@ -37,7 +37,7 @@
         <jobs>
             <factfindersync_job>
                 <schedule>
-                    <config_path>core/factfindersync/cron</config_path>
+                    <config_path>kirchbergerknorr/factfindersync/cron</config_path>
                 </schedule>
                 <run>
                     <model>factfindersync/observer::startProductSync</model>
@@ -66,5 +66,27 @@
                 </observers>
             </eav_collection_abstract_load_before>
         </events>
+        <acl>
+            <resources>
+                <all>
+                    <title>Allow Everything</title>
+                </all>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <kirchbergerknorr>
+                                            <title>kirchbergerknorr</title>
+                                        </kirchbergerknorr>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
     </adminhtml>
 </config>
