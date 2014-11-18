@@ -45,4 +45,26 @@
             </factfindersync_job>
         </jobs>
     </crontab>
+    <adminhtml>
+        <events>
+            <adminhtml_block_html_before>
+                <observers>
+                    <factfindersync>
+                        <!-- Add column to catalog product grid -->
+                        <class>factfindersync/adminhtml_observer</class>
+                        <method>onBlockHtmlBefore</method>
+                    </factfindersync>
+                </observers>
+            </adminhtml_block_html_before>
+            <eav_collection_abstract_load_before>
+                <observers>
+                    <factfindersync>
+                        <!-- Add column to product list -->
+                        <class>factfindersync/adminhtml_observer</class>
+                        <method>onEavLoadBefore</method>
+                    </factfindersync>
+                </observers>
+            </eav_collection_abstract_load_before>
+        </events>
+    </adminhtml>
 </config>
