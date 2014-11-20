@@ -2,8 +2,8 @@
 <config>
     <tabs>
         <kirchbergerknorr translate="label">
-            <label>Kirchbergerknorr</label>
-            <sort_order>99999</sort_order>
+            <label>kirchbergerknorr</label>
+            <sort_order>1</sort_order>
         </kirchbergerknorr>
     </tabs>
     <sections>
