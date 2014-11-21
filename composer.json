@@ -1,15 +1,8 @@
 {
-    "name": "kirchbergerknorr/factfindersync",
+    "name": "kirchbergerknorr/FactFinderSync",
     "description": "Kirchbergerknorr FactFinderSync",
     "type": "magento-module",
     "authors": [
         {"name": "Aleksey Razbakov", "email": "ar@kirchbergerknorr.de"}
-    ],
-    "repositories": [
-        {"type": "git", "url": "https://github.com/Flagbit/Magento-FACTFinder"},
-        {"type": "composer", "url": "http://packages.firegento.com"}
-    ],
-    "require": {
-        "flagbit/factfinder":"*"
-    }
+    ]
 }
