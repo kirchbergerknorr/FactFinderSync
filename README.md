@@ -22,11 +22,11 @@ Installation
     ...
     
     "repositories": [
-        {"type": "git", "url": "https://github.com/kirchbergerknorr/factfindersync"},
+        {"type": "git", "url": "https://github.com/kirchbergerknorr/FactFinderSync"},
     ],
     
     "require": {
-        "kirchbergerknorr/factfindersync": "*"
+        "kirchbergerknorr/FactFinderSync": "*"
     },
     
     ...
