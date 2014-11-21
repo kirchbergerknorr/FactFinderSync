@@ -36,7 +36,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Sync
         $this->indexProcess->setId(self::PROCESS_ID);
     }
 
-    public function start($count)
+    public function start($count = 0)
     {
         if (!$count) {
             $this->limit = Mage::getStoreConfig('kirchbergerknorr/factfindersync/queue');
