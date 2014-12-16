@@ -240,6 +240,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                 $this->updateProductsDates($this->_ids, $this->_updateTime);
             } catch (Exception $e) {
                 $this->log("Exception while importing: %s", $e->getMessage());
+                Mage::logException($e);
                 $isExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordAlreadyExistException');
                 $this->log("isExists: %s", $isExists);
 
@@ -272,6 +273,7 @@ class Kirchbergerknorr_FactFinderSync_Model_Factfinder
                     $this->updateProductsDates(array($product['id']), $this->_updateTime);
                 } catch (Exception $e) {
                     $this->log("Exception: %s", $e->getMessage());
+                    Mage::logException($e);
                     $isNotExists = strpos($e->getMessage(), 'de.factfinder.indexer.importer.RecordNotFoundException');
                     $this->log("isNotExists: %s", $isNotExists);
 
